@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { z } from 'zod';
+import logger from '../utils/logger.js';
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -25,10 +26,14 @@ const validateEnv = () => {
         const parsedEnv = envSchema.parse(process.env);
         return parsedEnv
     } catch (error) {
-        console.log("Envalid Environment Variable : ", error);
+        if (error instanceof z.ZodError){
+            logger.error("Invalid Environment Variable ");
+            error.errors.forEach(e => logger.error(`-${e.path.join(".")}: ${e.message}`));
+        }
+        logger.error("Unkown  Environment Validation Error : ", error);
         process.exit(1)
     }
 }
 
 const env = validateEnv()
-export default env
+export const {PORT, NODE_ENV,MONGODB_URI,JWT_ACCESS_EXPIRY, JWT_REFRESH_SECRET,JWT_REFRESH_EXPIRY,JWT_ACCESS_SECRET, BCRYPT_ROUNDS, RATE_LIMIT_MAX_REQUESTS, RATE_LIMIT_WINDOW_MS, CORS_ORIGIN}=  env
