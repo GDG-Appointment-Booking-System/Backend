@@ -25,7 +25,7 @@ const validateEnv = () => {
         const parsedEnv = envSchema.parse(process.env);
         return parsedEnv
     } catch (error) {
-        console.log("Envalid Environment Variable");
+        console.log("Envalid Environment Variable : ", error);
         process.exit(1)
     }
 }
