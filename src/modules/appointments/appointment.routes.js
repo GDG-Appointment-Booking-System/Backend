@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as appointmentController from './appointment.controller.js';
 import { createAppointmentSchema } from './appointment.validation.js';
-import validate from '../../shared/middleware/validate.js'; // optional Zod middleware
+import validate from '../../shared/middleware/validate.js';
 
 const router = Router();
 
