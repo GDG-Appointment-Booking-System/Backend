@@ -1,14 +1,36 @@
 import { Router } from 'express';
 import * as availabilityController from './availability.controller.js';
-import { createAvailabilitySchema } from './availability.validation.js';
-import validate from '../../shared/middleware/validate.js';
+import { protect, restrictTo } from '../../shared/middleware/auth.middleware.js';
 
 const router = Router();
 
-// Create a new availability slot
-router.post('/', validate(createAvailabilitySchema), availabilityController.createAvailability);
+router.use(protect);
 
-// Get all slots by provider
-router.get('/:providerId', availabilityController.getAvailability);
+
+router.get('/', availabilityController.getAllAvailability);
+
+router.get('/check', availabilityController.checkSlotAvailability);
+
+router.get('/provider/:providerId', availabilityController.getProviderAvailability);
+
+router.get('/provider/:providerId/date/:date', availabilityController.getAvailabilityByDate);
+
+router.get('/provider/:providerId/slots', availabilityController.getAvailableSlots);
+
+router.get('/provider/:providerId/upcoming', availabilityController.getUpcomingAvailability);
+
+router.get('/:availabilityId', availabilityController.getAvailabilityById);
+
+
+router.post('/', restrictTo('provider', 'admin'), availabilityController.createAvailability);
+
+// Update availability
+router.put('/:availabilityId', restrictTo('provider', 'admin'), availabilityController.updateAvailability);
+
+// Bulk delete availability
+router.delete('/bulk', restrictTo('provider', 'admin'), availabilityController.bulkDeleteAvailability);
+
+// Delete single availability
+router.delete('/:availabilityId', restrictTo('provider', 'admin'), availabilityController.deleteAvailability);
 
 export default router;
