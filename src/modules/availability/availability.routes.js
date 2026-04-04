@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as availabilityController from './availability.controller.js';
 import { createAvailabilitySchema } from './availability.validation.js';
-import validate from '../../shared/middleware/validate.js'; // optional Zod middleware
+import validate from '../../shared/middleware/validate.js';
 
 const router = Router();
 

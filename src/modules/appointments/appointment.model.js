@@ -11,4 +11,16 @@ const appointmentSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+// Index for user appointment queries
+appointmentSchema.index({ userId: 1, date: -1 });
+
+// Index for provider schedule queries
+appointmentSchema.index({ providerId: 1, date: 1, startTime: 1 });
+
+// Prevent double-booking (exclude cancelled appointments)
+appointmentSchema.index(
+  { providerId: 1, date: 1, startTime: 1 },
+  { unique: true, partialFilterExpression: { status: { $ne: 'cancelled' } } }
+);
+
 export default mongoose.model('Appointment', appointmentSchema);
