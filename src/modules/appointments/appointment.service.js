@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import Appointment from './appointment.model.js';
 import Availability from '../availability/availability.model.js';
 import { AppError } from '../../shared/utils/helpers.js';
+import { createNotification } from '../notifications/notification.service.js';
 
 export const createAppointment = async (data) => {
   const session = await mongoose.startSession();
@@ -60,6 +61,23 @@ export const createAppointment = async (data) => {
     await slot.save({ session });
 
     await session.commitTransaction();
+    
+    // Send notification to user
+    await createNotification({
+      userId: appointment.userId,
+      type: 'confirmation',
+      title: 'Booking Request Received',
+      message: `Your appointment request has been received. Waiting for provider confirmation.`,
+      data: { 
+        appointmentId: appointment._id,
+        providerId: appointment.providerId,
+        serviceId: appointment.serviceId,
+        date: appointment.date,
+        startTime: appointment.startTime
+      },
+      link: `/appointments/${appointment._id}`
+    });
+    
     return appointment;
   } catch (error) {
     await session.abortTransaction();
@@ -274,7 +292,9 @@ export const updateAppointment = async (appointmentId, updateData) => {
 };
 
 export const confirmAppointment = async (appointmentId) => {
-  const appointment = await Appointment.findById(appointmentId);
+  const appointment = await Appointment.findById(appointmentId)
+    .populate('userId', 'name email')
+    .populate('serviceId', 'name');
   
   if (!appointment) {
     throw new AppError('Appointment not found', 404);
@@ -288,6 +308,21 @@ export const confirmAppointment = async (appointmentId) => {
   appointment.confirmedAt = new Date();
   await appointment.save();
   
+  // Send confirmation notification
+  await createNotification({
+    userId: appointment.userId._id,
+    type: 'confirmation',
+    title: 'Appointment Confirmed',
+    message: `Your ${appointment.serviceId.name} appointment has been confirmed for ${appointment.date.toLocaleDateString()} at ${appointment.startTime}`,
+    data: { 
+      appointmentId: appointment._id,
+      serviceName: appointment.serviceId.name,
+      date: appointment.date,
+      startTime: appointment.startTime
+    },
+    link: `/appointments/${appointment._id}`
+  });
+  
   return appointment;
 };
 
@@ -296,7 +331,10 @@ export const cancelAppointment = async (appointmentId, reason = null) => {
   session.startTransaction();
 
   try {
-    const appointment = await Appointment.findById(appointmentId).session(session);
+    const appointment = await Appointment.findById(appointmentId)
+      .populate('userId', 'name email')
+      .populate('serviceId', 'name')
+      .session(session);
     
     if (!appointment) {
       throw new AppError('Appointment not found', 404);
@@ -327,6 +365,23 @@ export const cancelAppointment = async (appointmentId, reason = null) => {
     );
     
     await session.commitTransaction();
+    
+    // Send cancellation notification
+    await createNotification({
+      userId: appointment.userId._id,
+      type: 'cancelled',
+      title: 'Appointment Cancelled',
+      message: `Your ${appointment.serviceId.name} appointment on ${appointment.date.toLocaleDateString()} has been cancelled${reason ? `: ${reason}` : ''}`,
+      data: { 
+        appointmentId: appointment._id,
+        serviceName: appointment.serviceId.name,
+        date: appointment.date,
+        startTime: appointment.startTime,
+        reason: reason
+      },
+      link: `/appointments/${appointment._id}`
+    });
+    
     return appointment;
   } catch (error) {
     await session.abortTransaction();
@@ -337,7 +392,10 @@ export const cancelAppointment = async (appointmentId, reason = null) => {
 };
 
 export const completeAppointment = async (appointmentId) => {
-  const appointment = await Appointment.findById(appointmentId);
+  const appointment = await Appointment.findById(appointmentId)
+    .populate('userId', 'name email')
+    .populate('serviceId', 'name')
+    .populate('providerId', 'name');
   
   if (!appointment) {
     throw new AppError('Appointment not found', 404);
@@ -350,6 +408,22 @@ export const completeAppointment = async (appointmentId) => {
   appointment.status = 'completed';
   appointment.completedAt = new Date();
   await appointment.save();
+  
+  // Send completion notification 
+  await createNotification({
+    userId: appointment.userId._id,
+    type: 'completed',
+    title: 'Service Completed',
+    message: `Your ${appointment.serviceId.name} appointment is complete. How was your experience? Please leave a review!`,
+    data: { 
+      appointmentId: appointment._id,
+      serviceName: appointment.serviceId.name,
+      providerId: appointment.providerId,
+      providerName: appointment.providerId.name,
+      date: appointment.date
+    },
+    link: `/appointments/${appointment._id}/review`
+  });
   
   return appointment;
 };
