@@ -19,7 +19,6 @@ const envSchema = z.object({
   BCRYPT_ROUNDS: z.string().default("10").transform(Number),
   RATE_LIMIT_WINDOW_MS: z.string().default("900000").transform(Number),
   RATE_LIMIT_MAX_REQUESTS: z.string().default("100").transform(Number),
-  CORS_ORIGIN: z.string().default("http://localhost:3000"),
 });
 
 const validateEnv = () => {
@@ -27,16 +26,23 @@ const validateEnv = () => {
     const parsedEnv = envSchema.parse(process.env);
     return parsedEnv;
   } catch (error) {
+    logger.error("Environment validation failed");
+    
+    // Check if it's a ZodError
     if (error instanceof z.ZodError) {
-      logger.error("Invalid Environment Variable");
-      error.errors.forEach((e) =>
-        logger.error(`- ${e.path.join(".")}: ${e.message}`),
-      );
+      error.errors.forEach((err) => {
+        logger.error(`  - ${err.path.join(".")}: ${err.message}`);
+      });
+    } else {
+      // Handle other types of errors
+      logger.error("  Unexpected error:", error);
     }
-    logger.error("Unknown Environment Validation Error:", error);
+    
+    logger.error("💡 Missing or invalid environment variables");
+    logger.error("Please check your .env file or Render environment variables");
+    
     process.exit(1);
-  }
-};
+  }};
 
 const env = validateEnv();
 export const {
@@ -50,5 +56,4 @@ export const {
   BCRYPT_ROUNDS,
   RATE_LIMIT_MAX_REQUESTS,
   RATE_LIMIT_WINDOW_MS,
-  CORS_ORIGIN,
 } = env;
