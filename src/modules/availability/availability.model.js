@@ -61,9 +61,8 @@ const availabilitySchema = new mongoose.Schema({
 });
 
 // Update timestamp on save
-availabilitySchema.pre('save', function(next) {
+availabilitySchema.pre('save', function() {
   this.updatedAt = new Date();
-  next();
 });
 
 // Indexes for performance
