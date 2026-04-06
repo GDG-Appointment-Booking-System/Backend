@@ -1,21 +1,21 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import authRoutes from "../modules/auth/auth.routes.js";
-import userRoutes from "../modules/users/user.routes.js";
-import providerRoutes from "../modules/providers/provider.routes.js";
-import serviceRoutes from "../modules/services/service.routes.js";
-import reviewRoutes from "../modules/reviews/review.routes.js";
-import adminRoutes from "../modules/admin/admin.routes.js";
-import availabilityRoutes from "../modules/availability/availability.routes.js";
-import appointmentRoutes from "../modules/appointments/appointment.routes.js";
-import notificationRoutes from "../modules/notifications/notification.routes.js";
+import authRoutes from "./modules/auth/auth.routes.js";
+import userRoutes from "./modules/users/user.routes.js";
+import providerRoutes from "./modules/providers/provider.routes.js";
+import serviceRoutes from "./modules/services/service.routes.js";
+import reviewRoutes from "./modules/reviews/review.routes.js";
+import adminRoutes from "./modules/admin/admin.routes.js";
+import availabilityRoutes from "./modules/availability/availability.routes.js";
+import appointmentRoutes from "./modules/appointments/appointment.routes.js";
+import notificationRoutes from "./modules/notifications/notification.routes.js";
 import {
   notFoundHandler,
   globalErrorHandler,
-} from "../shared/middleware/error.middleware.js";
-import { rateLimiter } from "../shared/middleware/rateLimit.middleware.js";
-import { CORS_ORIGIN } from "../shared/config/env.config.js";
+} from "./shared/middleware/error.middleware.js";
+import { rateLimiter } from "./shared/middleware/rateLimit.middleware.js";
+import { CORS_ORIGIN } from "./shared/config/env.config.js";
 
 const app = express();
 app.enable("trust proxy");
