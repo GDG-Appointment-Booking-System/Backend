@@ -1,4 +1,4 @@
-import app from "./app.js";
+import app from "./routes/app.js";
 import connectDB from "./shared/config/db.config.js";
 import logger from "./shared/utils/logger.js";
 import { PORT } from "./shared/config/env.config.js";
