@@ -6,6 +6,7 @@ import { createNotification } from '../notifications/notification.service.js';
 
 export const createAppointment = async (data) => {
   const session = await mongoose.startSession();
+  // Keep appointment creation and availability updates in one transaction so the slot stays consistent.
   session.startTransaction();
 
   try {
@@ -93,6 +94,7 @@ export const getAllAppointments = async (query = {}) => {
   
   if (status) filter.status = status;
   if (date) {
+    // Expand the date into a full-day range so same-day appointments are returned reliably.
     const startDate = new Date(date);
     startDate.setHours(0, 0, 0, 0);
     const endDate = new Date(date);
