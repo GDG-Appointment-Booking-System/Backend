@@ -29,7 +29,6 @@ appointmentSchema.pre('save', function(next) {
 
 // Indexes
 appointmentSchema.index({ userId: 1, date: -1 });
-appointmentSchema.index({ providerId: 1, date: 1, startTime: 1 });
 appointmentSchema.index({ status: 1, date: 1 });
 appointmentSchema.index({ date: 1 });
 

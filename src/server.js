@@ -5,7 +5,7 @@ import { PORT } from "./shared/config/env.config.js";
 
 const startServer = async () => {
   try {
-    // await connectDB();
+    await connectDB();
     app.listen(PORT, () => {
       logger.info(`server is running on http://localhost:${PORT}`);
     });
