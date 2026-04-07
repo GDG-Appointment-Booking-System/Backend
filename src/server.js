@@ -3,6 +3,7 @@ import connectDB from "./shared/config/db.config.js";
 import logger from "./shared/utils/logger.js";
 import { PORT } from "./shared/config/env.config.js";
 
+
 const startServer = async () => {
   try {
     await connectDB();
